@@ -2,25 +2,18 @@
 (function(window, doc) {
 	'use strict';
 
-	log = function() {}; // noOp, remove this line to enable debugging
-
-	main();
-
-	function main() {
-
-		var div = doc.createElement('div');
-		var dragDiv = 'draggable' in div;
-		var evts = 'ondragstart' in div && 'ondrop' in div;
-
-		var needsPatch = !(dragDiv || evts) || /iPad|iPhone|iPod/.test(navigator.userAgent);
-		log((needsPatch ? '' : 'not ') + 'patching html5 drag drop');
-
-		if (false && !needsPatch) {
-			return;
-		}
-
-		doc.addEventListener('touchstart', touchstart);
+	// Add drag poly to devices with touch events
+	if (!('ontouchstart' in window)) {
+		return;
 	}
+
+	// Except Chrome on ChromeOS which may have user initiated drag and drop
+	// TODO: Get a recent ChromeBook and test
+	if (/CrOS.*Chrome/.exec(navigator.userAgent)) {
+		return;
+	}
+
+	doc.addEventListener('touchstart', touchstart);
 
 	function DragDrop(event, el) {
 
@@ -29,8 +22,6 @@
 		this.el = el || event.target;
 
 		event.preventDefault();
-
-		log('dragstart');
 
 		this.dispatchDragEvent('dragstart', this.el);
 		this.elTranslation = readTransform(this.el);
@@ -53,7 +44,6 @@
 
 			function cleanup() {
 				/*jshint validthis:true */
-				log('cleanup');
 				this.touchPositions = {};
 				// Clear this.el breaks snapback
 				this.dragData = null;
@@ -104,15 +94,12 @@
 			// we'll dispatch drop if there's a target, then dragEnd. If drop isn't fired
 			// or isn't cancelled, we'll snap back
 			// drop comes first http://www.whatwg.org/specs/web-apps/current-work/multipage/dnd.html#drag-and-drop-processing-model
-			log('dragend');
 
 			var target = elementFromTouchEvent(this.el, event);
 
 			if (target) {
-				log('found drop target ' + target.tagName);
 				this.dispatchDrop(target);
 			} else {
-				log('no drop target, scheduling snapBack');
 				once(doc, 'dragend', this.snapBack, this);
 			}
 
@@ -137,7 +124,6 @@
 			}.bind(this);
 
 			once(doc, 'drop', function() {
-				log('drop event not canceled');
 				if (snapBack) {
 					this.snapBack();
 				}
@@ -242,12 +228,6 @@
 			return el.removeEventListener(event, listener);
 		}
 		return el.addEventListener(event, listener);
-	}
-
-
-	// general helpers
-	function log(msg) {
-		console.log(msg);
 	}
 
 	function average(arr) {
