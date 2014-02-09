@@ -1,5 +1,6 @@
 /* global window, navigator */
 (function(window, doc) {
+	'use strict';
 
 	log = function() {}; // noOp, remove this line to enable debugging
 
@@ -45,14 +46,17 @@
 			var cancel = onEvt(doc, 'touchcancel', cleanup, this);
 
 			function ontouchend(event) {
-				this.dragend(event, event.target);
-				cleanup();
+				/*jshint validthis:true */
+				this.dragend(event);
+				cleanup.bind(this)();
 			}
 
 			function cleanup() {
+				/*jshint validthis:true */
 				log('cleanup');
 				this.touchPositions = {};
-				this.el = this.dragData = null;
+				// Clear this.el breaks snapback
+				this.dragData = null;
 				return [move, end, cancel].forEach(function(handler) {
 					return handler.off();
 				});
