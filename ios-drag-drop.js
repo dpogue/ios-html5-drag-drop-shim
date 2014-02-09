@@ -31,7 +31,7 @@
 
 		log('dragstart');
 
-		this.dispatchDragStart();
+		this.dispatchDragEvent('dragstart', this.el);
 		this.elTranslation = readTransform(this.el);
 
 		this.listen();
@@ -79,6 +79,21 @@
 			this.elTranslation.x += average(deltas.x);
 			this.elTranslation.y += average(deltas.y);
 			writeTransform(this.el, this.elTranslation.x, this.elTranslation.y);
+
+			var target = elementFromTouchEvent(this.el, event);
+
+			if (target === null) {
+				return;
+			}
+
+			if (target !== this.prevTarget) {
+				if (this.prevTarget !== undefined) {
+					this.dispatchDragEvent('dragleave', this.prevTarget);
+				}
+				this.dispatchDragEvent('dragenter', target);
+				this.prevTarget = target;
+			}
+			this.dispatchDragEvent('dragover', target);
 		},
 		dragend: function(event) {
 
@@ -135,16 +150,16 @@
 				writeTransform(this.el, 0, 0);
 			}.bind(this));
 		},
-		dispatchDragStart: function() {
+		dispatchDragEvent: function(eventname, el) {
 			var evt = doc.createEvent('Event');
-			evt.initEvent('dragstart', true, true);
+			evt.initEvent(eventname, true, true);
 			evt.dataTransfer = {
 				setData: function(type, val) {
 					this.dragData[type] = val;
 				}.bind(this),
 				dropEffect: 'move'
 			};
-			this.el.dispatchEvent(evt);
+			el.dispatchEvent(evt);
 		}
 	};
 
