@@ -1,4 +1,5 @@
-(function(doc) {
+/* global window, navigator */
+(function(window, doc) {
 
 	log = function() {}; // noOp, remove this line to enable debugging
 
@@ -7,8 +8,8 @@
 	function main() {
 
 		var div = doc.createElement('div');
-		dragDiv = 'draggable' in div;
-		evts = 'ondragstart' in div && 'ondrop' in div;
+		var dragDiv = 'draggable' in div;
+		var evts = 'ondragstart' in div && 'ondrop' in div;
 
 		var needsPatch = !(dragDiv || evts) || /iPad|iPhone|iPod/.test(navigator.userAgent);
 		log((needsPatch ? '' : 'not ') + 'patching html5 drag drop');
@@ -90,7 +91,7 @@
 
 			if (target) {
 				log('found drop target ' + target.tagName);
-				this.dispatchDrop();
+				this.dispatchDrop(target);
 			} else {
 				log('no drop target, scheduling snapBack');
 				once(doc, 'dragend', this.snapBack, this);
@@ -100,7 +101,7 @@
 			dragendEvt.initEvent('dragend', true, true);
 			this.el.dispatchEvent(dragendEvt);
 		},
-		dispatchDrop: function() {
+		dispatchDrop: function(target) {
 			var snapBack = true;
 
 			var dropEvt = doc.createEvent('Event');
@@ -165,7 +166,7 @@
 		parent.removeChild(el);
 
 		var touch = event.changedTouches[0];
-		target = doc.elementFromPoint(
+		var target = doc.elementFromPoint(
 			touch.pageX - window.pageXOffset,
 			touch.pageY - window.pageYOffset
 		);
@@ -256,4 +257,4 @@
 		};
 	}
 
-})(document);
+})(window, document);
