@@ -167,7 +167,8 @@
 	function touchstart(evt) {
 		var el = evt.target;
 		do {
-			if (el.hasAttribute('draggable')) {
+			// https://developer.mozilla.org/en/docs/DragDrop/Drag_Operations#draggableattribute
+			if (el.getAttribute('draggable') === 'true') {
 				evt.preventDefault();
 				new DragDrop(evt, el);
 			}
