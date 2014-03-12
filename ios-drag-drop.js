@@ -28,8 +28,6 @@
 		this.dragData = {};
 		this.el = el || event.target;
 
-		event.preventDefault();
-
 		log('dragstart');
 
 		this.dispatchDragEvent('dragstart', this.el);
@@ -67,6 +65,8 @@
 				x: [],
 				y: []
 			};
+
+			event.preventDefault();
 
 			[].forEach.call(event.changedTouches, function(touch, index) {
 				var lastPosition = this.touchPositions[index];
@@ -173,7 +173,6 @@
 		do {
 			// https://developer.mozilla.org/en/docs/DragDrop/Drag_Operations#draggableattribute
 			if (el.getAttribute('draggable') === 'true') {
-				evt.preventDefault();
 				new DragDrop(evt, el);
 			}
 		} while ((el = el.parentNode) && el !== doc.body);
