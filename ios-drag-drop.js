@@ -15,7 +15,7 @@
 		var needsPatch = !(dragDiv || evts) || /iPad|iPhone|iPod/.test(navigator.userAgent);
 		log((needsPatch ? '' : 'not ') + 'patching html5 drag drop');
 
-		if (false && !needsPatch) {
+		if (!needsPatch) {
 			return;
 		}
 
@@ -27,6 +27,9 @@
 		this.touchPositions = {};
 		this.dragData = {};
 		this.el = el || event.target;
+		this.isClick = true;
+
+		event.preventDefault();
 
 		log('dragstart');
 
@@ -45,7 +48,11 @@
 
 			function ontouchend(event) {
 				/*jshint validthis:true */
-				this.dragend(event);
+				if (this.isClick) {
+					this.click(event);
+				} else {
+					this.dragend(event);
+				}
 				cleanup.bind(this)();
 			}
 
@@ -84,6 +91,11 @@
 			this.elTranslation.y += average(deltas.y);
 			writeTransform(this.el, this.elTranslation.x, this.elTranslation.y);
 
+			if (this.elTranslation.x >= 5 || this.elTranslation.x <= -5 ||
+			    this.elTranslation.y >= 5 || this.elTranslation.y <= -5) {
+				this.isClick = false;
+			}
+
 			var target = elementFromTouchEvent(this.el, event);
 
 			if (target === null) {
@@ -98,6 +110,13 @@
 				this.prevTarget = target;
 			}
 			this.dispatchDragEvent('dragover', target);
+		},
+		click: function(event) {
+			log('click');
+
+			var clickEvt = doc.createEvent('Event');
+			clickEvt.initEvent('click', true, true);
+			this.el.dispatchEvent(clickEvt);
 		},
 		dragend: function(event) {
 
@@ -133,7 +152,7 @@
 			dropEvt.preventDefault = function() {
 				// https://www.w3.org/Bugs/Public/show_bug.cgi?id=14638 - if we don't cancel it, we'll snap back
 				snapBack = false;
-				writeTransform(this.el, 0, 0);
+				clearTransform(this.el);
 			}.bind(this);
 
 			once(doc, 'drop', function() {
@@ -148,6 +167,7 @@
 		snapBack: function() {
 			once(this.el, 'webkitTransitionEnd', function() {
 				this.el.style['-webkit-transition'] = 'none';
+				clearTransform(this.el);
 			}, this);
 			setTimeout(function() {
 				this.el.style['-webkit-transition'] = 'all 0.2s';
@@ -173,16 +193,15 @@
 		do {
 			// https://developer.mozilla.org/en/docs/DragDrop/Drag_Operations#draggableattribute
 			if (el.getAttribute('draggable') === 'true') {
+				evt.preventDefault();
 				new DragDrop(evt, el);
 			}
-		} while ((el = el.parentNode) && el !== doc.body);
+		} while ((el = el.parentNode) && el !== doc.body && el !== doc);
 	}
 
 	// DOM helpers
 	function elementFromTouchEvent(el, event) {
-		var parent = el.parentElement;
-		var next = el.nextSibling;
-		parent.removeChild(el);
+		el.style.pointerEvents = 'none';
 
 		var touch = event.changedTouches[0];
 		var target = doc.elementFromPoint(
@@ -190,11 +209,7 @@
 			touch.pageY - window.pageYOffset
 		);
 
-		if (next) {
-			parent.insertBefore(el, next);
-		} else {
-			parent.appendChild(el);
-		}
+		el.style.pointerEvents = '';
 
 		return target;
 	}
@@ -217,6 +232,11 @@
 	function writeTransform(el, x, y) {
 		var transform = el.style['-webkit-transform'].replace(/translate\(\D*\d+[^,]*,\D*\d+[^,]*\)\s*/g, '');
 		el.style['-webkit-transform'] = transform + ' translate(' + x + 'px,' + y + 'px)';
+	}
+
+	function clearTransform(el) {
+		var transform = el.style['-webkit-transform'].replace(/translate\(\D*\d+[^,]*,\D*\d+[^,]*\)\s*/g, '');
+		el.style['-webkit-transform'] = transform;
 	}
 
 	function onEvt(el, event, handler, context) {
