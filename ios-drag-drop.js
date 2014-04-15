@@ -36,6 +36,9 @@
 		this.dispatchDragEvent('dragstart', this.el);
 		this.elTranslation = readTransform(this.el);
 
+		var transform = this.el.style['-webkit-transform'].replace(/scale\(\D*\d+[^,]*\)/, '');
+		this.el.style['-webkit-transform'] = transform + ' scale(2)';
+
 		this.listen();
 
 	}
@@ -113,6 +116,8 @@
 		},
 		click: function(event) {
 			log('click');
+
+			clearTransform(this.el);
 
 			var clickEvt = doc.createEvent('Event');
 			clickEvt.initEvent('click', true, true);
@@ -230,13 +235,14 @@
 	}
 
 	function writeTransform(el, x, y) {
-		var transform = el.style['-webkit-transform'].replace(/translate\(\D*\d+[^,]*,\D*\d+[^,]*\)\s*/g, '');
-		el.style['-webkit-transform'] = transform + ' translate(' + x + 'px,' + y + 'px)';
+		var transform = el.style['-webkit-transform'].replace(/translate3d\(\D*\d+[^,]*,\D*\d+[^,]*,\D*\d+[^,]*\)\s*/g, '');
+		transform = transform.replace('scale(2)', '');
+		el.style['-webkit-transform'] = transform + ' translate3d(' + x + 'px,' + y + 'px, 1px) scale(2)';
 	}
 
 	function clearTransform(el) {
-		var transform = el.style['-webkit-transform'].replace(/translate\(\D*\d+[^,]*,\D*\d+[^,]*\)\s*/g, '');
-		el.style['-webkit-transform'] = transform;
+		var transform = el.style['-webkit-transform'].replace(/translate3d\(\D*\d+[^,]*,\D*\d+[^,]*,\D*\d+[^,]*\)\s*/g, '');
+		el.style['-webkit-transform'] = transform.replace('scale(2)', '');
 	}
 
 	function onEvt(el, event, handler, context) {
