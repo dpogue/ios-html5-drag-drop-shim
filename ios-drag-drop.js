@@ -114,7 +114,7 @@
 		click: function(event) {
 			log('click');
 
-			var clickEvt = doc.createEvent('Event');
+			var clickEvt = doc.createEvent('MouseEvents');
 			clickEvt.initEvent('click', true, true);
 			this.el.dispatchEvent(clickEvt);
 		},
