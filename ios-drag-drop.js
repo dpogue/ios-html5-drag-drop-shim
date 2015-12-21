@@ -10,8 +10,8 @@
     coordinateSystemForElementFromPoint = navigator.userAgent.match(/OS 5(?:_\d+)+ like Mac/) ? "client" : "page";
 
     var div = doc.createElement('div');
-    dragDiv = 'draggable' in div;
-    evts = 'ondragstart' in div && 'ondrop' in div;
+    var dragDiv = 'draggable' in div;
+    var evts = 'ondragstart' in div && 'ondrop' in div;
 
     var needsPatch = !(dragDiv || evts) || /iPad|iPhone|iPod/.test(navigator.userAgent);
     log((needsPatch ? "" : "not ") + "patching html5 drag drop");
@@ -26,7 +26,7 @@
     this.touchPositions = {};
     this.dragData = {};
 
-    duplicate_el = (el).cloneNode(true);
+    var duplicate_el = (el).cloneNode(true);
     el.parentNode.insertBefore(duplicate_el, el);
     el.style.left = duplicate_el.offsetLeft+"px";
     this.duplicate_el=duplicate_el;
@@ -196,7 +196,7 @@
     var transform = el.style["-webkit-transform"];
     var x = 0
     var y = 0
-    var match = /translate\(\s*(\d+)[^,]*,\D*(\d+)/.exec(transform)
+    var match = /translate3d\(\s*(\d+)[^,]*,\D*(\d+)/.exec(transform)
     if(match) {
       x = parseInt(match[1],10)
       y = parseInt(match[2],10)
