@@ -7,7 +7,7 @@
   var coordinateSystemForElementFromPoint;
 
   function main() {
-    coordinateSystemForElementFromPoint = navigator.userAgent.match(/OS 5(?:_\d+)+ like Mac/) ? "client" : "page";
+    coordinateSystemForElementFromPoint = "page";
 
     var div = doc.createElement('div');
     var dragDiv = 'draggable' in div;
