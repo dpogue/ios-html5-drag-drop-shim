@@ -16,7 +16,7 @@
     var needsPatch = !(dragDiv || evts) || /iPad|iPhone|iPod/.test(navigator.userAgent);
     log((needsPatch ? "" : "not ") + "patching html5 drag drop");
 
-    if(false && !needsPatch) return
+    if(false && !needsPatch) return;
 
     doc.addEventListener("touchstart", touchstart);
   }
@@ -26,25 +26,25 @@
     this.touchPositions = {};
     this.dragData = {};
 
-    var duplicate_el = (el).cloneNode(true);
+    duplicate_el = (el).cloneNode(true);
     el.parentNode.insertBefore(duplicate_el, el);
     el.style.left = duplicate_el.offsetLeft+"px";
     this.duplicate_el=duplicate_el;
 
-    this.el = el || event.target
+    this.el = el || event.target;
 
-    this.el.style.position = "absolute";
-    this.el.style["-webkit-transform"] = null;
-    this.el.style.zIndex = "1000";
+    el.style.position = "absolute";
+    el.style["-webkit-transform"] = null;
+    el.style.zIndex = "1000";
 
     event.preventDefault();
 
     log("dragstart");
 
-    this.dispatchDragStart()
+    this.dispatchDragStart();
     this.elTranslation = readTransform(this.el);
 
-    this.listen()
+    this.listen();
 
   }
 
@@ -80,7 +80,7 @@
         }
         lastPosition.x = touch.pageX;
         lastPosition.y = touch.pageY;
-      }.bind(this))
+      }.bind(this));
 
       this.elTranslation.x += average(deltas.x);
       this.elTranslation.y += average(deltas.y);
@@ -98,14 +98,15 @@
       this.el.style.position = "relative";
       this.el.style["-webkit-transform"] = "none";
       this.el.style.zIndex = "auto";
+      this.duplicate_el.remove();
 
-      var target = elementFromTouchEvent(this.el,event)
+      var target = elementFromTouchEvent(this.el,event);
 
       if (target) {
         log("found drop target " + target.tagName);
-        this.dispatchDrop()
+        this.dispatchDrop();
       } else {
-        log("no drop target, scheduling snapBack")
+        log("no drop target, scheduling snapBack");
         once(doc, "dragend", this.snapBack, this);
       }
 
@@ -166,15 +167,14 @@
         evt.preventDefault();
         new DragDrop(evt,el);
       }
-    } while((el = el.parentNode) && el != doc.body)
+    } while((el = el.parentNode) && el != doc.body);
   }
 
   // DOM helpers
   function elementFromTouchEvent(el,event) {
     var parent = el.parentElement;
-    var next = el.nextSibling
+    var next = el.nextSibling;
 
-    this.duplicate_el.remove();
     parent.removeChild(el);
 
     var touch = event.changedTouches[0];
@@ -189,17 +189,17 @@
       parent.appendChild(el);
     }
 
-    return target
+    return target;
   }
 
   function readTransform(el) {
     var transform = el.style["-webkit-transform"];
-    var x = 0
-    var y = 0
-    var match = /translate3d\(\s*(\d+)[^,]*,\D*(\d+)/.exec(transform)
+    var x = 0;
+    var y = 0;
+    var match = /translate3d\(\s*(\d+)[^,]*,\D*(\d+)/.exec(transform);
     if(match) {
-      x = parseInt(match[1],10)
-      y = parseInt(match[2],10)
+      x = parseInt(match[1],10);
+      y = parseInt(match[2],10);
     }
     return { x: x, y: y };
   }
@@ -210,7 +210,7 @@
   }
 
   function onEvt(el, event, handler, context) {
-    if(context) handler = handler.bind(context)
+    if(context) handler = handler.bind(context);
     el.addEventListener(event, handler);
     return {
       off: function() {
@@ -220,7 +220,7 @@
   }
 
   function once(el, event, handler, context) {
-    if(context) handler = handler.bind(context)
+    if(context) handler = handler.bind(context);
     function listener(evt) {
       handler(evt);
       return el.removeEventListener(event,listener);
