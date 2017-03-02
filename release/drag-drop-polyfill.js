@@ -1,6 +1,15 @@
-var DEBUG;
-var DragDropPolyfill;
-(function (DragDropPolyfill) {
+(function (factory) {
+    if (typeof module === "object" && typeof module.exports === "object") {
+        var v = factory(require, exports);
+        if (v !== undefined) module.exports = v;
+    }
+    else if (typeof define === "function" && define.amd) {
+        define(["require", "exports"], factory);
+    }
+})(function (require, exports) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    var DEBUG;
     function detectFeatures() {
         var features = {
             dragEvents: ("ondragstart" in document.documentElement),
@@ -54,7 +63,6 @@ var DragDropPolyfill;
         supportsPassive = supportsPassiveEventListener();
         addDocumentListener("touchstart", onTouchstart, false);
     }
-    DragDropPolyfill.Initialize = Initialize;
     var activeDragOperation;
     function onTouchstart(e) {
         console.log("dnd-poly: global touchstart");
@@ -723,5 +731,9 @@ var DragDropPolyfill;
         }
         return DROP_EFFECTS[0];
     }
-})(DragDropPolyfill || (DragDropPolyfill = {}));
+    exports.DragDropPolyfill = {
+        DEBUG: DEBUG,
+        Initialize: Initialize
+    };
+});
 //# sourceMappingURL=drag-drop-polyfill.js.map

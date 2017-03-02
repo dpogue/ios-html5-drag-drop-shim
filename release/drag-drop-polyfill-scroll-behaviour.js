@@ -1,5 +1,15 @@
-var DragDropPolyfill;
-(function (DragDropPolyfill) {
+(function (factory) {
+    if (typeof module === "object" && typeof module.exports === "object") {
+        var v = factory(require, exports);
+        if (v !== undefined) module.exports = v;
+    }
+    else if (typeof define === "function" && define.amd) {
+        define(["require", "exports", "./drag-drop-polyfill.js"], factory);
+    }
+})(function (require, exports) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    var drag_drop_polyfill_js_1 = require("./drag-drop-polyfill.js");
     var _options = {
         threshold: 75,
         velocityFn: function (velocity, threshold) {
@@ -198,7 +208,11 @@ var DragDropPolyfill;
             _options[key] = options[key];
         });
     }
-    DragDropPolyfill.SetOptions = SetOptions;
-    DragDropPolyfill.HandleDragImageTranslateOverride = handleDragImageTranslateOverride;
-})(DragDropPolyfill || (DragDropPolyfill = {}));
+    exports.HandleDragImageTranslateOverride = handleDragImageTranslateOverride;
+    exports.DragDropPolyfill = {
+        DEBUG: drag_drop_polyfill_js_1.DragDropPolyfill.DEBUG,
+        Initialize: drag_drop_polyfill_js_1.DragDropPolyfill.Initialize,
+        SetOptions: SetOptions
+    };
+});
 //# sourceMappingURL=drag-drop-polyfill-scroll-behaviour.js.map
