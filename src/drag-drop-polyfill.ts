@@ -166,14 +166,14 @@ let activeDragOperation:DragOperationController;
  */
 function onTouchstart( e:TouchEvent ) {
 
-    console.log( "dnd-poly: global touchstart" );
+    DEBUG && console.log( "dnd-poly: global touchstart" );
 
     // From the moment that the user agent is to initiate the drag-and-drop operation,
     // until the end of the drag-and-drop operation, device input events (e.g. mouse and keyboard events) must be suppressed.
 
     // only allow one drag operation at a time
     if( activeDragOperation ) {
-        console.log( "dnd-poly: drag operation already active" );
+        DEBUG && console.log( "dnd-poly: drag operation already active" );
         return;
     }
 
@@ -233,7 +233,7 @@ function dragOperationEnded( _config:Config, event:TouchEvent, state:DragOperati
     // we need to make the default action happen only when no drag operation took place
     if( state === DragOperationState.POTENTIAL ) {
 
-        console.log( "dnd-poly: Drag never started. Last event was " + event.type );
+        DEBUG && console.log( "dnd-poly: Drag never started. Last event was " + event.type );
 
         // when lifecycle hook is present
         if( _config.defaultActionOverride ) {
@@ -244,13 +244,13 @@ function dragOperationEnded( _config:Config, event:TouchEvent, state:DragOperati
 
                 if( event.defaultPrevented ) {
 
-                    console.log( "dnd-poly: defaultActionOverride has taken care of triggering the default action. preventing default on original event" );
+                    DEBUG && console.log( "dnd-poly: defaultActionOverride has taken care of triggering the default action. preventing default on original event" );
                 }
 
             }
             catch( e ) {
 
-                console.log( "dnd-poly: error in defaultActionOverride: " + e );
+                DEBUG && console.log( "dnd-poly: error in defaultActionOverride: " + e );
             }
         }
     }
@@ -344,7 +344,7 @@ class DragOperationController {
                  private _sourceNode:HTMLElement,
                  private _dragOperationEndedCb:( config:Config, event:TouchEvent, state:DragOperationState ) => void ) {
 
-        console.log( "dnd-poly: setting up potential drag operation.." );
+        DEBUG && console.log( "dnd-poly: setting up potential drag operation.." );
 
         this._lastTouchEvent = _initialEvent;
         this._initialTouch = _initialEvent.changedTouches[ 0 ];
@@ -411,7 +411,7 @@ class DragOperationController {
      * and drop process model iteration interval.
      */
     private _setup():boolean {
-        console.log( "dnd-poly: starting drag and drop operation" );
+        DEBUG && console.log( "dnd-poly: starting drag and drop operation" );
 
         this._dragOperationState = DragOperationState.STARTED;
 
@@ -452,7 +452,7 @@ class DragOperationController {
         this._dragDataStore._mode = DragDataStoreMode.READWRITE;
         this._dataTransfer.dropEffect = DROP_EFFECTS[ DROP_EFFECT.NONE ];
         if( dispatchDragEvent( "dragstart", this._sourceNode, this._lastTouchEvent, this._dragDataStore, this._dataTransfer ) ) {
-            console.log( "dnd-poly: dragstart cancelled" );
+            DEBUG && console.log( "dnd-poly: dragstart cancelled" );
             // dragstart has been prevented -> cancel d'n'd
             this._dragOperationState = DragOperationState.CANCELLED;
             this._cleanup();
@@ -503,7 +503,7 @@ class DragOperationController {
             // If the user agent is still performing the previous iteration of the sequence (if any) when the next iteration becomes due,
             // abort these steps for this iteration (effectively "skipping missed frames" of the drag-and-drop operation).
             if( this._iterationLock ) {
-                console.log( "dnd-poly: iteration skipped because previous iteration hast not yet finished." );
+                DEBUG && console.log( "dnd-poly: iteration skipped because previous iteration hast not yet finished." );
                 return;
             }
             this._iterationLock = true;
@@ -518,7 +518,7 @@ class DragOperationController {
 
     private _cleanup() {
 
-        console.log( "dnd-poly: cleanup" );
+        DEBUG && console.log( "dnd-poly: cleanup" );
 
         if( this._iterationIntervalId ) {
             clearInterval( this._iterationIntervalId );
@@ -590,7 +590,7 @@ class DragOperationController {
             return;
         }
 
-        console.log( "dnd-poly: moving draggable.." );
+        DEBUG && console.log( "dnd-poly: moving draggable.." );
 
         // we emulate d'n'd so we dont want any defaults to apply
         event.preventDefault();
@@ -641,7 +641,7 @@ class DragOperationController {
                 }
             }
             catch( e ) {
-                console.log( "dnd-poly: error in dragImageTranslateOverride hook: " + e );
+                DEBUG && console.log( "dnd-poly: error in dragImageTranslateOverride hook: " + e );
             }
         }
 
@@ -663,7 +663,7 @@ class DragOperationController {
                 } );
             }
             catch( e ) {
-                console.log( "dnd-poly: error in dragImageTranslateOverride hook: " + e );
+                DEBUG && console.log( "dnd-poly: error in dragImageTranslateOverride hook: " + e );
             }
         }
 
@@ -701,7 +701,7 @@ class DragOperationController {
         this._dataTransfer.dropEffect = DROP_EFFECTS[ DROP_EFFECT.NONE ];
         const dragCancelled = dispatchDragEvent( "drag", this._sourceNode, this._lastTouchEvent, this._dragDataStore, this._dataTransfer );
         if( dragCancelled ) {
-            console.log( "dnd-poly: drag event cancelled." );
+            DEBUG && console.log( "dnd-poly: drag event cancelled." );
             // If this event is canceled, the user agent must set the current drag operation to "none" (no drag operation).
             this._currentDragOperation = DROP_EFFECTS[ DROP_EFFECT.NONE ];
         }
@@ -731,7 +731,7 @@ class DragOperationController {
         // check the state of the drag-and-drop operation, as follows:
         const newUserSelection:HTMLElement = <HTMLElement>document.elementFromPoint( this._currentHotspotCoordinates.x, this._currentHotspotCoordinates.y );
 
-        console.log( "dnd-poly: new immediate user selection is: " + newUserSelection );
+        DEBUG && console.log( "dnd-poly: new immediate user selection is: " + newUserSelection );
 
         const previousTargetElement = this._currentDropTarget;
 
@@ -766,7 +766,7 @@ class DragOperationController {
                 //Set the current target element to null also.
                 this._currentDropTarget = this._immediateUserSelection;
 
-                console.log( "dnd-poly: current drop target changed to null" );
+                DEBUG && console.log( "dnd-poly: current drop target changed to null" );
             }
             // THIS IS SKIPPED SINCE SUPPORT IS ONLY AVAILABLE FOR DOM ELEMENTS
             // If the new immediate user selection is in a non-DOM document or application
@@ -783,7 +783,7 @@ class DragOperationController {
                 this._dragDataStore._mode = DragDataStoreMode.PROTECTED;
                 this._dataTransfer.dropEffect = determineDropEffect( this._dragDataStore._effectAllowed, this._sourceNode );
                 if( dispatchDragEvent( "dragenter", this._immediateUserSelection, this._lastTouchEvent, this._dragDataStore, this._dataTransfer ) ) {
-                    console.log( "dnd-poly: dragenter default prevented" );
+                    DEBUG && console.log( "dnd-poly: dragenter default prevented" );
                     // If the event is canceled, then set the current target element to the immediate user selection.
                     this._currentDropTarget = this._immediateUserSelection;
                     this._currentDragOperation = determineDragOperation( this._dataTransfer.effectAllowed, this._dataTransfer.dropEffect );
@@ -853,7 +853,7 @@ class DragOperationController {
                 previousTargetElement.classList.remove( debug_class_drop_target );
             }
 
-            console.log( "dnd-poly: current drop target changed." );
+            DEBUG && console.log( "dnd-poly: current drop target changed." );
 
             this._dragDataStore._mode = DragDataStoreMode.PROTECTED;
             this._dataTransfer.dropEffect = DROP_EFFECTS[ DROP_EFFECT.NONE ];
@@ -873,7 +873,7 @@ class DragOperationController {
             this._dataTransfer.dropEffect = determineDropEffect( this._dragDataStore._effectAllowed, this._sourceNode );
             if( dispatchDragEvent( "dragover", this._currentDropTarget, this._lastTouchEvent, this._dragDataStore, this._dataTransfer ) === false ) {
 
-                console.log( "dnd-poly: dragover not prevented on possible drop-target." );
+                DEBUG && console.log( "dnd-poly: dragover not prevented on possible drop-target." );
                 // NO DROPZONE SUPPORT SINCE NATIVE IMPLEMENTATIONS IN BROWSERS ALSO DO NOT
 
                 // THIS IS SKIPPED SINCE SUPPORT IS ONLY AVAILABLE FOR DOM ELEMENTS
@@ -895,13 +895,13 @@ class DragOperationController {
             // dropEffect attributes of the DragEvent object's dataTransfer object as they stood after the event dispatch finished
             else {
 
-                console.log( "dnd-poly: dragover prevented." );
+                DEBUG && console.log( "dnd-poly: dragover prevented." );
 
                 this._currentDragOperation = determineDragOperation( this._dataTransfer.effectAllowed, this._dataTransfer.dropEffect );
             }
         }
 
-        console.log( "dnd-poly: d'n'd iteration ended. current drag operation: " + this._currentDragOperation );
+        DEBUG && console.log( "dnd-poly: d'n'd iteration ended. current drag operation: " + this._currentDragOperation );
 
         // THIS IS SKIPPED SINCE SUPPORT IS ONLY AVAILABLE FOR DOM ELEMENTS
         // Otherwise, if the current target element is not a DOM element, use platform-specific mechanisms to determine what drag operation is
@@ -932,7 +932,7 @@ class DragOperationController {
      */
     private _dragOperationEnded( state:DragOperationState ):boolean {
 
-        console.log( "dnd-poly: drag operation end detected with " + this._currentDragOperation );
+        DEBUG && console.log( "dnd-poly: drag operation end detected with " + this._currentDragOperation );
 
         if( DEBUG ) {
 
@@ -1060,7 +1060,7 @@ class DragOperationController {
 
     // dispatch dragend event and cleanup drag operation
     private _finishDragOperation():void {
-        console.log( "dnd-poly: dragimage snap back transition ended" );
+        DEBUG && console.log( "dnd-poly: dragimage snap back transition ended" );
 
         // Fire a DND event named dragend at the source node.
         this._dragDataStore._mode = DragDataStoreMode.PROTECTED;
@@ -1383,13 +1383,13 @@ function applyDragImageSnapback( sourceEl:HTMLElement, dragImage:HTMLElement, dr
     const cs = getComputedStyle( sourceEl );
 
     if( cs.visibility === "hidden" || cs.display === "none" ) {
-        console.log( "dnd-poly: source node is not visible. skipping snapback transition." );
+        DEBUG && console.log( "dnd-poly: source node is not visible. skipping snapback transition." );
         // shortcut to end the drag operation
         transitionEndCb();
         return;
     }
 
-    console.log( "dnd-poly: starting dragimage snap back" );
+    DEBUG && console.log( "dnd-poly: starting dragimage snap back" );
 
     // calc source node position
     const rect = sourceEl.getBoundingClientRect();
@@ -1481,7 +1481,7 @@ function dispatchDragEvent( dragEvent:string,
                             cancelable = true,
                             relatedTarget:Element = null ):boolean {
 
-    console.log( "dnd-poly: dispatching " + dragEvent );
+    DEBUG && console.log( "dnd-poly: dispatching " + dragEvent );
 
     if( DEBUG ) {
         var debug_class                      = CLASS_PREFIX + "debug",
