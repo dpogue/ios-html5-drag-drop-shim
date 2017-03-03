@@ -61,9 +61,9 @@ function Initialize(override) {
 }
 var activeDragOperation;
 function onTouchstart(e) {
-    console.log("dnd-poly: global touchstart");
+    DEBUG && console.log("dnd-poly: global touchstart");
     if (activeDragOperation) {
-        console.log("dnd-poly: drag operation already active");
+        DEBUG && console.log("dnd-poly: drag operation already active");
         return;
     }
     var dragTarget = tryFindDraggableTarget(e);
@@ -91,16 +91,16 @@ function tryFindDraggableTarget(event) {
 }
 function dragOperationEnded(_config, event, state) {
     if (state === 0) {
-        console.log("dnd-poly: Drag never started. Last event was " + event.type);
+        DEBUG && console.log("dnd-poly: Drag never started. Last event was " + event.type);
         if (_config.defaultActionOverride) {
             try {
                 _config.defaultActionOverride(event);
                 if (event.defaultPrevented) {
-                    console.log("dnd-poly: defaultActionOverride has taken care of triggering the default action. preventing default on original event");
+                    DEBUG && console.log("dnd-poly: defaultActionOverride has taken care of triggering the default action. preventing default on original event");
                 }
             }
             catch (e) {
-                console.log("dnd-poly: error in defaultActionOverride: " + e);
+                DEBUG && console.log("dnd-poly: error in defaultActionOverride: " + e);
             }
         }
     }
@@ -122,7 +122,7 @@ var DragOperationController = (function () {
         this._dragOperationState = 0;
         this._immediateUserSelection = null;
         this._currentDropTarget = null;
-        console.log("dnd-poly: setting up potential drag operation..");
+        DEBUG && console.log("dnd-poly: setting up potential drag operation..");
         this._lastTouchEvent = _initialEvent;
         this._initialTouch = _initialEvent.changedTouches[0];
         this._touchMoveHandler = this._onTouchMove.bind(this);
@@ -133,7 +133,7 @@ var DragOperationController = (function () {
     }
     DragOperationController.prototype._setup = function () {
         var _this = this;
-        console.log("dnd-poly: starting drag and drop operation");
+        DEBUG && console.log("dnd-poly: starting drag and drop operation");
         this._dragOperationState = 1;
         this._currentDragOperation = DROP_EFFECTS[0];
         this._dragDataStore = {
@@ -163,7 +163,7 @@ var DragOperationController = (function () {
         this._dragDataStore._mode = 2;
         this._dataTransfer.dropEffect = DROP_EFFECTS[0];
         if (dispatchDragEvent("dragstart", this._sourceNode, this._lastTouchEvent, this._dragDataStore, this._dataTransfer)) {
-            console.log("dnd-poly: dragstart cancelled");
+            DEBUG && console.log("dnd-poly: dragstart cancelled");
             this._dragOperationState = 3;
             this._cleanup();
             return false;
@@ -198,7 +198,7 @@ var DragOperationController = (function () {
         document.body.appendChild(this._dragImage);
         this._iterationIntervalId = setInterval(function () {
             if (_this._iterationLock) {
-                console.log("dnd-poly: iteration skipped because previous iteration hast not yet finished.");
+                DEBUG && console.log("dnd-poly: iteration skipped because previous iteration hast not yet finished.");
                 return;
             }
             _this._iterationLock = true;
@@ -208,7 +208,7 @@ var DragOperationController = (function () {
         return true;
     };
     DragOperationController.prototype._cleanup = function () {
-        console.log("dnd-poly: cleanup");
+        DEBUG && console.log("dnd-poly: cleanup");
         if (this._iterationIntervalId) {
             clearInterval(this._iterationIntervalId);
             this._iterationIntervalId = null;
@@ -252,7 +252,7 @@ var DragOperationController = (function () {
             }
             return;
         }
-        console.log("dnd-poly: moving draggable..");
+        DEBUG && console.log("dnd-poly: moving draggable..");
         event.preventDefault();
         updateCentroidCoordinatesOfTouchesIn("client", event, this._currentHotspotCoordinates);
         updateCentroidCoordinatesOfTouchesIn("page", event, this._dragImagePageCoordinates);
@@ -278,7 +278,7 @@ var DragOperationController = (function () {
                 }
             }
             catch (e) {
-                console.log("dnd-poly: error in dragImageTranslateOverride hook: " + e);
+                DEBUG && console.log("dnd-poly: error in dragImageTranslateOverride hook: " + e);
             }
         }
         translateDragImage(this._dragImage, this._dragImagePageCoordinates, this._dragImageTransforms, this._dragImageOffset, this._config.dragImageCenterOnTouch);
@@ -293,7 +293,7 @@ var DragOperationController = (function () {
                 });
             }
             catch (e) {
-                console.log("dnd-poly: error in dragImageTranslateOverride hook: " + e);
+                DEBUG && console.log("dnd-poly: error in dragImageTranslateOverride hook: " + e);
             }
         }
         if (this._dragOperationState === 0) {
@@ -313,7 +313,7 @@ var DragOperationController = (function () {
         this._dataTransfer.dropEffect = DROP_EFFECTS[0];
         var dragCancelled = dispatchDragEvent("drag", this._sourceNode, this._lastTouchEvent, this._dragDataStore, this._dataTransfer);
         if (dragCancelled) {
-            console.log("dnd-poly: drag event cancelled.");
+            DEBUG && console.log("dnd-poly: drag event cancelled.");
             this._currentDragOperation = DROP_EFFECTS[0];
         }
         if (dragCancelled || this._dragOperationState === 2 || this._dragOperationState === 3) {
@@ -328,7 +328,7 @@ var DragOperationController = (function () {
             return;
         }
         var newUserSelection = document.elementFromPoint(this._currentHotspotCoordinates.x, this._currentHotspotCoordinates.y);
-        console.log("dnd-poly: new immediate user selection is: " + newUserSelection);
+        DEBUG && console.log("dnd-poly: new immediate user selection is: " + newUserSelection);
         var previousTargetElement = this._currentDropTarget;
         if (newUserSelection !== this._immediateUserSelection && newUserSelection !== this._currentDropTarget) {
             if (DEBUG) {
@@ -348,13 +348,13 @@ var DragOperationController = (function () {
             }
             if (this._immediateUserSelection === null) {
                 this._currentDropTarget = this._immediateUserSelection;
-                console.log("dnd-poly: current drop target changed to null");
+                DEBUG && console.log("dnd-poly: current drop target changed to null");
             }
             else {
                 this._dragDataStore._mode = 3;
                 this._dataTransfer.dropEffect = determineDropEffect(this._dragDataStore._effectAllowed, this._sourceNode);
                 if (dispatchDragEvent("dragenter", this._immediateUserSelection, this._lastTouchEvent, this._dragDataStore, this._dataTransfer)) {
-                    console.log("dnd-poly: dragenter default prevented");
+                    DEBUG && console.log("dnd-poly: dragenter default prevented");
                     this._currentDropTarget = this._immediateUserSelection;
                     this._currentDragOperation = determineDragOperation(this._dataTransfer.effectAllowed, this._dataTransfer.dropEffect);
                 }
@@ -369,7 +369,7 @@ var DragOperationController = (function () {
             if (DEBUG) {
                 previousTargetElement.classList.remove(debug_class_drop_target);
             }
-            console.log("dnd-poly: current drop target changed.");
+            DEBUG && console.log("dnd-poly: current drop target changed.");
             this._dragDataStore._mode = 3;
             this._dataTransfer.dropEffect = DROP_EFFECTS[0];
             dispatchDragEvent("dragleave", previousTargetElement, this._lastTouchEvent, this._dragDataStore, this._dataTransfer, false, this._currentDropTarget);
@@ -382,15 +382,15 @@ var DragOperationController = (function () {
             this._dragDataStore._mode = 3;
             this._dataTransfer.dropEffect = determineDropEffect(this._dragDataStore._effectAllowed, this._sourceNode);
             if (dispatchDragEvent("dragover", this._currentDropTarget, this._lastTouchEvent, this._dragDataStore, this._dataTransfer) === false) {
-                console.log("dnd-poly: dragover not prevented on possible drop-target.");
+                DEBUG && console.log("dnd-poly: dragover not prevented on possible drop-target.");
                 this._currentDragOperation = DROP_EFFECTS[0];
             }
             else {
-                console.log("dnd-poly: dragover prevented.");
+                DEBUG && console.log("dnd-poly: dragover prevented.");
                 this._currentDragOperation = determineDragOperation(this._dataTransfer.effectAllowed, this._dataTransfer.dropEffect);
             }
         }
-        console.log("dnd-poly: d'n'd iteration ended. current drag operation: " + this._currentDragOperation);
+        DEBUG && console.log("dnd-poly: d'n'd iteration ended. current drag operation: " + this._currentDragOperation);
         if (previousDragOperation !== this._currentDragOperation) {
             this._dragImage.classList.remove(CLASS_PREFIX + previousDragOperation);
         }
@@ -400,7 +400,7 @@ var DragOperationController = (function () {
         }
     };
     DragOperationController.prototype._dragOperationEnded = function (state) {
-        console.log("dnd-poly: drag operation end detected with " + this._currentDragOperation);
+        DEBUG && console.log("dnd-poly: drag operation end detected with " + this._currentDragOperation);
         if (DEBUG) {
             var debug_class_user_selection = CLASS_PREFIX + "immediate-user-selection", debug_class_drop_target = CLASS_PREFIX + "current-drop-target";
             if (this._currentDropTarget) {
@@ -436,7 +436,7 @@ var DragOperationController = (function () {
         return dragFailed;
     };
     DragOperationController.prototype._finishDragOperation = function () {
-        console.log("dnd-poly: dragimage snap back transition ended");
+        DEBUG && console.log("dnd-poly: dragimage snap back transition ended");
         this._dragDataStore._mode = 3;
         this._dataTransfer.dropEffect = this._currentDragOperation;
         dispatchDragEvent("dragend", this._sourceNode, this._lastTouchEvent, this._dragDataStore, this._dataTransfer, false);
@@ -639,11 +639,11 @@ function translateDragImage(dragImage, pnt, originalTransforms, offset, centerOn
 function applyDragImageSnapback(sourceEl, dragImage, dragImageTransforms, transitionEndCb) {
     var cs = getComputedStyle(sourceEl);
     if (cs.visibility === "hidden" || cs.display === "none") {
-        console.log("dnd-poly: source node is not visible. skipping snapback transition.");
+        DEBUG && console.log("dnd-poly: source node is not visible. skipping snapback transition.");
         transitionEndCb();
         return;
     }
-    console.log("dnd-poly: starting dragimage snap back");
+    DEBUG && console.log("dnd-poly: starting dragimage snap back");
     var rect = sourceEl.getBoundingClientRect();
     var pnt = {
         x: rect.left,
@@ -685,7 +685,7 @@ function determineDropEffect(effectAllowed, sourceNode) {
 function dispatchDragEvent(dragEvent, targetElement, touchEvent, dataStore, dataTransfer, cancelable, relatedTarget) {
     if (cancelable === void 0) { cancelable = true; }
     if (relatedTarget === void 0) { relatedTarget = null; }
-    console.log("dnd-poly: dispatching " + dragEvent);
+    DEBUG && console.log("dnd-poly: dispatching " + dragEvent);
     if (DEBUG) {
         var debug_class = CLASS_PREFIX + "debug", debug_class_event_target = CLASS_PREFIX + "event-target", debug_class_event_related_target = CLASS_PREFIX + "event-related-target";
         targetElement.classList.add(debug_class);
